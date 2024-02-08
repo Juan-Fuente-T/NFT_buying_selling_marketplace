@@ -5,7 +5,10 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
-/foundry
+/foundry/*
+!/foundry/src/
+!/foundry/test/
+!/foundry/script/
 
 # testing
 /coverage
