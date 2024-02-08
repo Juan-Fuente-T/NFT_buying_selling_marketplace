@@ -1,0 +1,45 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 12px;
+    background-color: #c3cdd7;
+}
+
+.image_logo {
+    max-width: 190px;
+    max-height: 50px;
+    margin: 1% 1%;
+}
+
+.title {
+    font-size: 2rem;
+    margin: 2rem 0;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background-color: blue;
+    border: none;
+    color: #ffffff;
+    font-size: 1em;
+    padding: 15px;
+    width: 180px;
+    height: 55px;
+    cursor: pointer;
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+
+@media (max-width: 1000px) {
+    .main {
+        width: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
