@@ -4,26 +4,6 @@ import NFTGallery from '../components/NFTGallery';
 import PopupForm from '../components/PopUpForm';
 import styles from "../styles/Home.module.css";
 import { WalletProvider } from '../components/WalletContext';
-import { ethers, providers } from "ethers";
-
-
-const SAMPLE_NFTS = [
-  {
-    id: 1,
-    name: 'Cosa1',
-    image: '/pop1.png',
-    price: 0.5,
-    offerType: 'sell',
-  },
-  {
-    id: 2,
-    name: 'Cosa2',
-    image: '/pop.png',
-    price: 1.0,
-    offerType: 'buy',
-  },
-  // Add more sample NFTs as needed
-];
 
 
 /*const getTokenMetadataById = async () => {
@@ -79,42 +59,9 @@ const HomePage = () => {
     console.log(`Accepted ${offerType} offer for NFT ${nftId}`);
   };
 
-  const [nftData, setNftData] = useState();
 
   async function getNFTMetadata(nftAddress, tokenId, networkId) {
 
-    const nft = {
-      animation_url: null,
-      collection: "azukiteamsepolia",
-      contract: "0x98b2c7c22e1fbf77ee66d92d4d75515b52aebfe8",
-      creator: "0x8e1f1868458900e0f712fe4d2f151a74eb21f1f5",
-      description: null,
-      identifier: "1",
-      image_url: "https://ipfs.io/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/1.png",
-      is_disabled: false,
-      is_nsfw: false,
-      is_suspicious: false,
-      metadata_url: "https://ipfs.io/ipfs/QmZcH4YvBVVRJtdn4RdbaqgspFU8gH6P9vomDpBVpAL3u4/1",
-      name: "Azuki #1",
-      opensea_url: "https://testnets.opensea.io/assets/sepolia/0x98b2c7c22e1fbf77ee66d92d4d75515b52aebfe8/1",
-      owners: [{
-        address: "0x9eb665d4373b07e4c913c21f7f4680927684d02a",
-        quantity: 1
-      }],
-      rarity: null,
-      token_standard: "erc721",
-      traits: [
-        { trait_type: 'Type', display_type: null, max_value: null, value: 'Human' },
-        { trait_type: 'Hair', display_type: null, max_value: null, value: 'Pink Hairband' },
-        { trait_type: 'Clothing', display_type: null, max_value: null, value: 'White Qipao with Fur' },
-        { trait_type: 'Eyes', display_type: null, max_value: null, value: 'Daydreaming' },
-        { trait_type: 'Mouth', display_type: null, max_value: null, value: 'Lipstick' },
-        { trait_type: 'Offhand', display_type: null, max_value: null, value: 'Gloves' },
-        { trait_type: 'Background', display_type: null, max_value: null, value: 'Off White D' }
-      ],
-      updated_at: "2024-01-26T07:13:54.087430"
-    };
-    //return nft;
 
 
 
@@ -168,16 +115,12 @@ const HomePage = () => {
     }*/
   }
 
-
-
-
-
-
   return (
     <WalletProvider>
       <div>
         <NavBar />
-        <NFTGallery nfts={SAMPLE_NFTS} nftsData={nftsData} onAcceptOffer={handleAcceptOffer} />
+        {/*<NFTGallery nfts={SAMPLE_NFTS} nftsData={nftsData} onAcceptOffer={handleAcceptOffer} />*/}
+        <NFTGallery nftsData={nftsData} onAcceptOffer={handleAcceptOffer} />
         <div>
           <div className={styles.container_form}>
             <div className={styles.container_form_button}>

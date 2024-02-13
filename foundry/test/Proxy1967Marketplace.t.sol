@@ -3,50 +3,8 @@ pragma solidity ^0.8.20;
 import {Test, console, console2} from "../lib/forge-std/src/Test.sol";
 import {Proxy1967Marketplace} from "../src/Proxy1967Marketplace.sol";
 import {MarketplaceBlockcoder} from "../src/MarketplaceBlockcoder.sol";
+import {IMarketplaceBlockcoder} from "../src/IMarketplaceBlockcoder.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
-interface IMarketplaceBlockcoder {
-    function upgradeToAndCall(address, bytes memory) external payable;
-
-    function proxiableUUID() external view returns (bytes32);
-
-    function createSellOffer(
-        address _nftAddress,
-        uint256 _tokenId,
-        uint256 _price,
-        uint256 _deadline
-    ) external;
-
-    function acceptSellOffer(uint256 _sellOfferIdCounter) external payable;
-
-    function cancelSellOffer(uint256 _sellOfferIdCounter) external;
-
-    function createBuyOffer(
-        address _nftAddress,
-        uint256 _tokenId,
-        uint256 _deadline
-    ) external payable;
-
-    function acceptBuyOffer(uint256 _buyOfferIdCounter) external;
-
-    function cancelBuyOffer(uint256 _buyOfferIdCounter) external;
-
-    function sellOfferIdCounter() external view returns (uint256);
-
-    function buyOfferIdCounter() external view returns (uint256);
-
-    function owner() external view returns (address);
-
-    function marketplaceName() external view returns (string memory);
-
-    function initialize(string memory _marketplaceName) external;
-
-    function getSellOffer(uint256 offerId) external view returns (address, address, uint256, uint256, bool);
-    
-    function getBuyOffer(uint256 offerId) external view returns (address, address, uint256, uint256, bool);
-
-     
-}
 
 contract TestERC721 is ERC721 {
     constructor() ERC721("TestNFT", "TNFT") {}

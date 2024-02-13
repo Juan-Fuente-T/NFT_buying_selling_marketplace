@@ -2,8 +2,7 @@
 pragma solidity ^0.8.20;
 
 //import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import {console, console2} from "../lib/forge-std/src/Test.sol";
+import {UUPSUpgradeable} from "../node_modules/@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {IERC721} from "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
@@ -159,7 +158,13 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
 
     /**
      * @dev Function to create sell offers for NFTs.
-s
+     * @param _nftAddress The address of the NFT contract.
+     * @param _tokenId The ID of the NFT to be offered for sale.
+     * @param _price The price in ETH for the sell offer.
+     * @param _deadline The deadline for accepting the sell offer.
+     * @notice Ensure that the provided NFT address and token ID are valid.
+     * @notice Ensure that the deadline is set in the future.
+     */
 
     function createSellOffer(
         address _nftAddress,
@@ -170,7 +175,7 @@ s
 
         ///////////////////////////CHECKS/////////////////////7//////////////
 
-        if (!(_price > 0)) {
+        if (_price == 0) {
             revert InsufficientValue();
         }
         if (IERC721(_nftAddress).ownerOf(_tokenId) != msg.sender) {
@@ -229,7 +234,7 @@ s
         if (msg.value < sellOffers[idCounter].price) {
             revert InsufficientValue();
         }
-        if (msg.sender == address(0x0)) {
+        if (msg.sender == address(0)) {
             revert InvalidAddress();
         }
 
@@ -318,7 +323,7 @@ s
         if (!(msg.value > 0)) {
             revert InsufficientValue();
         }
-        if (msg.sender == address(0x0)) {
+        if (msg.sender == address(0)) {
             revert InvalidAddress();
         }
 

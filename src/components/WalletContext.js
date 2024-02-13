@@ -1,6 +1,8 @@
 import React, { createContext, useState, useRef, useEffect } from 'react';
-import { providers } from 'ethers';
+import { ethers, providers } from 'ethers';
 import Web3Modal from 'web3modal';
+
+
 
 export const WalletContext = createContext();
 
@@ -25,12 +27,12 @@ export const WalletProvider = ({ children }) => {
         // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
         const provider = await web3ModalRef.current.connect();
         const web3Provider = new providers.Web3Provider(provider);
-
+        console.log("Web3 Provider Context:", web3Provider);
         // If user is not connected to the Sepolia network, let them know and throw an error
-        const { chainId } = await web3Provider.getNetwork();
-        if (chainId !== 5) {
-            window.alert("Change the network to Goerli");
-            throw new Error("Change network to Goerli");
+        const network = await web3Provider.getNetwork();
+        if (network.chainId !== 11155111) {
+            window.alert("Change the network to Sepolia");
+            throw new Error("Change network to Sepolia");
         }
         const signer = web3Provider.getSigner();
 
@@ -45,15 +47,22 @@ export const WalletProvider = ({ children }) => {
             // Get the provider from web3Modal, which in our case is MetaMask
             // When used for the first time, it prompts the user to connect their wallet
             const signer = await getProviderOrSigner(true);
+
+            // Log the provider to see if it's ready
+            console.log("ProviderContext:", signer.provider);
+
+            // Obtain the address separately and set it
             const address = await signer.getAddress();
+            console.log("SignerContext:", signer);
+            console.log("AddressContext:", address);
+
             setSigner(signer);
-            setAddress(address);
+            setAddress(address); // Set the address obtained
             setWalletConnected(true);
         } catch (err) {
             console.error(err);
         }
     };
-
 
     // useEffects are used to react to changes in state of the website
     // The array at the end of function call represents what state changes will trigger this effect
@@ -65,8 +74,8 @@ export const WalletProvider = ({ children }) => {
             // The `current` value is persisted throughout as long as this page is open
             web3ModalRef.current = new Web3Modal({
                 network: "sepolia",
+                cacheProvider: true,
                 providerOptions: {},
-                disableInjectedProvider: false,
             });
             connectWallet();
         }
