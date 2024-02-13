@@ -256,7 +256,7 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                 window.alert("You successfully cancelled a Sell Offer!");
 
             } else if (actionType === 'acceptBuyOffer') {
-                const nftContract = new Contract(sellOffers.nftAddress, abiPartERC721.json, signer);
+                const nftContract = new Contract(nftAddress, abiPartERC721.json, signer);
                 const approveTx = await nftContract.approve(contractAddress, buyOffers.tokenId);
                 setLoading(true);
                 // wait for the transaction to get mined
