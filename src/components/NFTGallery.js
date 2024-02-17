@@ -5,13 +5,14 @@ import { Contract, providers, utils, ethers } from 'ethers';
 import contractABI from '../contractABI.json';
 import abiPartERC721 from '../abiPartERC721.json';
 import { WalletContext } from './WalletContext';
+import { parseBytes32String } from 'ethers/lib/utils';
 require('dotenv').config();
 
 const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS;
 // Acceder al array "abi" dentro del objeto
 const abi = contractABI.abi;
 
-
+//console.log("DATAfromINDEX", nftsData.tokenId);
 
 async function getNFTMetadata(nftAddress, tokenId, networkId) {
 
@@ -89,23 +90,25 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
 
     const marketplaceContract = new Contract(contractAddress, abi, signer);
     //const nftContract = new Contract(sellOffers.nftAddress, abiPartERC721.json, signer);
-    console.log("DATOSXXX: ", sellOffers.nftAddress, abiPartERC721.json, signer);
+    console.log("DATOSXXX: ", sellOffers.nftAddress, abiPartERC721, signer);
 
-    console.log("Datos_en_Gallery: ", nftsData.nftAddress, nftsData.tokenId);
+    console.log("Datos_en_Gallery: ", nftsData.nftAddress, nftsData.tokenId, nftsData.price);
+    //console.log("YYYYYYYYYYY", ethers.utils.parseEther(nftsData.price));
     const fetchOffers = async () => {
         try {
             // Estado para almacenar los metadatos de los NFTs
             //const [nftMetadatas, setNftMetadatas] = useState([]);
             // Obtén el número total de sell offers desde el contrato
-            const totalSellOffers = await marketplaceContract.sellOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
+            const _totalSellOffers = await marketplaceContract.sellOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
             //setTotalSellOffers(total.sub(1)); // Subtract  1 because the counter starts at  1
-            console.log("NFTs_en_Gallery: ", totalSellOffers.toNumber());
-
+            const totalSellOffers = _totalSellOffers.toNumber();
+            console.log("NFTs_en_Gallery: ", _totalSellOffers, totalSellOffers);
             const sellOffersArray = [];
             for (let i = 0; i < totalSellOffers; i++) {
                 const offer = await marketplaceContract.getSellOffer(i);
                 // Filtra las ofertas que no han sido terminadas
                 if (!offer[4]) { // If isEnded is false
+                    const sellOfferId = i;
                     const nftDataArray = await getNFTMetadata(offer[0], offer[2], 11155111); // Obtiene la URI del token
                     //const metadataResponse = await fetch(tokenURI); // Fetch the metadata from the URI
                     const nftData = nftDataArray[0]; // Parse the JSON response
@@ -119,7 +122,7 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                         isEnded: offer[4], // offer[4] is the isEnded flag
                         image_url: nftData.image_url,
                         name: nftData.name,
-                        offerId: i
+                        offerId: sellOfferId
                     };
                     console.log("Image_url", newSellOffer.image_url);
                     sellOffersArray.push(newSellOffer);
@@ -127,8 +130,9 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
             }
             setSellOffers(sellOffersArray);
 
-            const totalBuyOffers = await marketplaceContract.buyOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
-            console.log("NFTs_en_BUYGallery: ", totalBuyOffers.toNumber());
+            const _totalBuyOffers = await marketplaceContract.buyOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
+            const totalBuyOffers = _totalBuyOffers.toNumber();
+            console.log("NFTs_en_BUYGallery: ", _totalBuyOffers, totalBuyOffers);
             const buyOffersArray = [];
             for (let i = 0; i < totalBuyOffers; i++) {
                 const offer = await marketplaceContract.getBuyOffer(i);
@@ -143,15 +147,19 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                     };
                     buyOffersArray.push(newBuyOffer);
                 }
+                console.log("PRICE_BUCLE: ", offer[3]);
             }
-            console.log("OfferID", offerId);
             setSellOffers(sellOffersArray);
+
             //bueno https://ipfs.io/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/1.png
             console.log("SellOffersArray: ", sellOffers);
         } catch (error) {
             console.error("Error fetching sell offers:", error);
         }
     };
+    useEffect(() => {
+        console.log("SellOffersPRICEXX: ", sellOffers.tokenId);
+    }, [sellOffers]);
 
     // Llamada a la función que obtiene las sell offers cuando el componente se monta
     useEffect(() => {
@@ -203,40 +211,66 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
         }
     }*/
 
-
     //MIO//const nftAddress = '0xef7CdD4bA1186be2A7c3f283DcBEa0Ba7a6B4e2f'; // Dirección del contrato del NFT
     //MIO//const tokenId = '5'; // ID del token del NFT
     const nftAddress = '0x98b2c7c22e1fbf77ee66d92d4d75515b52aebfe8'; // Dirección del contrato del NFT
     //const nftAddress = '0xed5af388653567af2f388e6224dc7c4b3241c544'; // Dirección del contrato del NFT
-    const tokenId = '1'; // ID del token del NFT
     //const networkId = '80001'; //Id de la net, en este caso mumbai
 
-    //const nftAddress = nftsData.nftAddress; // Dirección del contrato del NFT
-    //const tokenId = nftsData.tokenId; // ID del token del NFT
-    const networkId = '11155111'; //Id de la net, en este caso sepolia
-    const _nft = getNFTMetadata(nftAddress, tokenId, networkId)
-    //.then(metadata => console.log(metadata))
-    //.catch(console.error);
-    //setNftData(data);
-    //const [nfts, setNFTs] = useState([]);
-    console.log("NOMBRE:", _nft.name);
-    console.log("ID:", _nft.identifier);
-    //console.log("IMAGEN:", nftData.image);
-
-    //console.log("id: ", nftsData.tokenId);
-
-
-
-    const handleOfferAction = async (offerId, actionType, nftAddress) => {
+    const handleOfferAction = async (offerId, actionType, nftAddress, tokenId, price) => {
         try {
+            /*console.log("XXXXXXX3", price);
             //console.log("DATOSXXX: ", sellOffers.nftAddress, abiPartERC721.json, signer);
 
+            console.log("OfferId: ", offerId);
+            console.log("PARAMETROS", offerId, actionType, nftAddress, tokenId, price);*/
+
+
+            //const numOfferId = parseInt(offerId);
+            console.log("XXXXXXX", price);
+
+
             if (actionType === 'acceptSellOffer') {
-                const tx = await marketplaceContract.acceptSellOffer(
-                    sellOffers.offerId,
+                console.log("DATOSXXXBOTON: ", nftAddress, abiPartERC721, signer);
+
+                console.log("PARAMETROS BOTON: ", offerId, actionType, nftAddress, tokenId, price);
+                console.log("PRICE: ", price);
+
+                // Primero, construye la transacción
+                /*const transactionParameters = {
+                    from: signer.g,
+                    to: sellOffers.offerer,
+                    value: price, // Aquí especificas el valor en ether que deseas enviar
+                    gas:30000, // Puedes ajustar el límite de gas según tus necesidades
+                  };
+                  
+                  // Luego, llama a la función del contrato
+                  contractInstance.methods.acceptSellOffer(1).send(transactionParameters)
+                  .on('transactionHash', function(hash){
+                    // Maneja el hash de la transacción si es necesario
+                  })
+                  .on('receipt', function(receipt){
+                    // Maneja el recibo de la transacción si es necesario
+                  })
+                  .on('confirmation', function(confirmationNumber, receipt){
+                    // Maneja la confirmación de la transacción si es necesario
+                  })
+                  .on('error', console.error); // Maneja cualquier error que pueda ocurrir durante el envío de la transacción*/
+                console.log("Value: ", price);
+                //const priceInWei = ethers.utils.parseEther(price);
+                const estimatedGasLimit = await marketplaceContract.estimateGas.acceptSellOffer(
+                    offerId,
                     // value signifies the cost of one Planet NFT which is "0.01" eth.
                     // We are parsing price string to ether using the utils library from ethers.js
-                    { value: utils.parseEther(sellOffers.price) });
+                    { value: parsedPrice });
+                console.log("GasLimit: ", estimatedGasLimit);
+                const _gasLimit = ethers.utils.hexlify(estimatedGasLimit);
+                const tx = await marketplaceContract.acceptSellOffer(
+                    offerId,
+                    // value signifies the cost of one Planet NFT which is "0.01" eth.
+                    // We are parsing price string to ether using the utils library from ethers.js
+                    // { value: parsedPrice, gasLimit: ethers.constants.MaxUint256 });
+                    { value: parsedPrice, gasLimit: estimatedGasLimit });
                 setLoading(true);
                 console.log("Transaction Hash:", tx.hash);
                 // wait for the transaction to get mined
@@ -246,8 +280,12 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
 
 
             } else if (actionType === 'cancelSellOffer') {
-                console.log("SellOfferID: ", sellOffers.offerId);
-                const tx = await marketplaceContract.cancelSellOffer(offerId);
+                console.log("SellOfferID: ", offerId);
+                const estimatedGasLimit = await marketplaceContract.estimateGas.cancelSellOffer(
+                    offerId);
+                console.log("GasLimitCANCEL: ", estimatedGasLimit);
+                const gasLimit = ethers.utils.hexlify(estimatedGasLimit);
+                const tx = await marketplaceContract.cancelSellOffer(offerId, { gasLimit: gasLimit });
                 setLoading(true);
                 console.log("Transaction Hash:", tx.hash);
                 // wait for the transaction to get mined
@@ -257,20 +295,16 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
 
             } else if (actionType === 'acceptBuyOffer') {
                 const nftContract = new Contract(nftAddress, abiPartERC721.json, signer);
-                const approveTx = await nftContract.approve(contractAddress, buyOffers.tokenId);
+                const approveTx = await nftContract.approve(contractAddress, tokenId);
                 setLoading(true);
                 // wait for the transaction to get mined
                 await approveTx.wait();
-                const tx = await marketplaceContract.acceptSellOffer(
-                    buyOffers.offerId,
-                    // value signifies the cost of one Planet NFT which is "0.01" eth.
-                    // We are parsing price string to ether using the utils library from ethers.js
-                    { value: utils.parseEther(buyOffers.price) });
+                const tx = await marketplaceContract.acceptBuyOffer(offerId);
                 console.log("Transaction Hash:", tx.hash);
                 setLoading(false);
                 window.alert("You successfully accepted a Buy Offer! You selled the NFT and receive the Ether");
             } else if (actionType === 'cancelBuyOffer') {
-                const tx = await marketplaceContract.cancelBuyOffer(buyOffers.offerId);
+                const tx = await marketplaceContract.cancelBuyOffer(offerId);
                 setLoading(true);
                 console.log("Transaction Hash:", tx.hash);
                 // wait for the transaction to get mined
@@ -304,26 +338,19 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
 
     return (
         <div className={styles.container_gallery}>
-            <div className={styles.intro_gallery}>
-                <div className={styles.container_title}>
-                    <h2 className={styles.nft_title}>NFTs for Sale </h2>
-                    <h2 className={styles.nft_title}>BLA BLA BLA lo que sea </h2>
-                </div>
-                <img className={styles.container_image} src='/pop.png' />
-            </div>
 
             <div className={styles.gallery}>
                 <div className={styles.nft_card}>
-                    {Array.isArray(sellOffers) && sellOffers.map((sellOffers, index) => (
+                    {Array.isArray(sellOffers) && sellOffers.map((individualOffer, index) => (
 
                         <div className={styles.nft_details} key={index}>
-                            <img className={styles.nft_image} src={sellOffers.image_url} alt={`NFT ${sellOffers.tokenId}`} />
+                            <img className={styles.nft_image} src={individualOffer.image_url} alt={`NFT ${individualOffer.tokenId}`} />
                             <div className={styles.nft_data}>
-                                <p className={styles.nft_price}>Price: {ethers.utils.formatEther(sellOffers.price)} ETH</p>
-                                <p className={styles.nft_name}>Name: {sellOffers.name}</p>
+                                <p className={styles.nft_price}>Price: {ethers.utils.formatEther(individualOffer.price)} ETH</p>
+                                <p className={styles.nft_name}>Name: {individualOffer.name}</p>
 
-                                <button className={styles.accept_button} onClick={() => handleOfferAction(sellOffers.tokenId, 'acceptSellOffer', sellOffers.nftAddress)}>Accept Offer</button>
-                                <button className={styles.accept_button} onClick={() => handleOfferAction(sellOffers.tokenId, 'cancelSellOffer', sellOffers.nftAddress)}>Cancel Offer</button>
+                                <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'acceptSellOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Accept Offer</button>
+                                <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'cancelSellOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Cancel Offer</button>
                             </div>
                         </div>
 
@@ -334,6 +361,9 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
         </div>
     );
 };
+
+
+
 
 export default NFTGallery;
 //<div className={styles.gallery}></div>
@@ -407,4 +437,43 @@ const NFTList = () => {
 
 */
 
+/*
+import Web3 from 'web3';
 
+// Conectar a la red Ethereum (aquí usamos la red local de desarrollo)
+const web3 = new Web3(window.ethereum || 'http://localhost:8545');
+
+// Dirección del contrato
+const contractAddress = '0xYourContractAddress';
+
+// ABI del contrato (necesitas proporcionar la ABI completa)
+const contractAbi = [
+  // ... (coloca aquí la ABI de tu contrato)
+];
+
+// Crear una instancia del contrato
+const contract = new web3.eth.Contract(contractAbi, contractAddress);
+
+// Función para crear una oferta de compra
+async function createBuyOffer(nftAddress, tokenId, deadline) {
+  try {
+    // Dirección del usuario actual
+    const accounts = await web3.eth.getAccounts();
+    const userAddress = accounts[0];
+
+    // Montante de Ether a enviar (en Wei)
+    const ethAmount = web3.utils.toWei('0.1', 'ether'); // Ejemplo:  0.1 ETH
+
+    // Llamar a la función createBuyOffer del contrato
+    const receipt = await contract.methods.createBuyOffer(nftAddress, tokenId, deadline)
+      .send({ from: userAddress, value: ethAmount });
+
+    console.log('Oferta de compra creada exitosamente:', receipt);
+  } catch (error) {
+    console.error('Error al crear la oferta de compra:', error);
+  }
+}
+
+// Ejemplo de uso de la función
+createBuyOffer('0xNftContractAddress', '1', Math.floor(Date.now() /  1000) +  60 *  60 *  24); // Oferta válida por  24 hor
+*/

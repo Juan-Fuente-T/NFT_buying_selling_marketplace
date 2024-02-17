@@ -65,30 +65,35 @@ const PopupForm = ({ onClose, onSubmit }) => {
             //const signer = await getProviderOrSigner(true);
             // Create a new instance of the Contract with a Signer, which allows
             // update methods
+
             //const provider = new ethers.providers.JsonRpcProvider(providerUrl);
-            console.log("Provider URL Pop:", providerUrl);
+
+            /*console.log("Provider URL Pop:", providerUrl);
             console.log("Contract Address Pop:", contractAddress);
-            console.log(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
+            console.log(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);*/
             const marketplaceContract = new Contract(contractAddress, abi, signer);
             const nftContract = new Contract(nftAddress, abiPart, signer);
 
             onSubmit({ nftAddress, tokenId, price, deadline });
 
-            const prueba = await marketplaceContract.sellOfferIdCounter();
+            /*const prueba = await marketplaceContract.sellOfferIdCounter();
             const datos = await marketplaceContract.getSellOffer(0);
             const datos2 = await marketplaceContract.getBuyOffer(0);
             console.log("Instance of nftContractPop:", nftContract);
-            console.log("DatosArgumentosPopUp:", nftAddress, tokenId, price, deadline);
-            console.log("Signer address:", await signer.getAddress());
-            console.log("SellCounterPopPrueba: ", prueba);
-            console.log("SellPopDatos: ", datos);
-            console.log("SellPopDatos2: ", datos2);
+             console.log("DatosArgumentosPopUp:", nftAddress, tokenId, price, deadline);
+             console.log("Signer address:", await signer.getAddress());
+             console.log("SellCounterPopPrueba: ", prueba);
+             console.log("SellPopDatos: ", datos);
+             console.log("SellPopDatos2: ", datos2);*/
 
             // Conviertir el precio a wei
             const priceInWei = ethers.utils.parseEther(price);
+
+            console.log("PRICFormulario", price);
+            console.log("PRICEinWEI", priceInWei);
             // Calcular el plazo final en segundos
             const deadlineInSeconds = Math.floor(Date.now() / 1000) + (parseInt(deadline) * 60 * 60 * 24);
-
+            const numTokenId = parseInt(tokenId);
             if (offerType == "sell") {
                 //Llama a la función approve en el contrato NFT
                 const approveTx = await nftContract.approve(contractAddress, tokenId);
@@ -100,11 +105,12 @@ const PopupForm = ({ onClose, onSubmit }) => {
                 console.log("APPROVED?");
                 const tx = await marketplaceContract.createSellOffer(
                     nftAddress,
-                    parseInt(tokenId),
+                    numTokenId,
                     priceInWei,
                     deadlineInSeconds
                 );
                 setLoading(true);
+                setNftAddress()
                 /*
                 // Llama a la función createSellOffer en el contrato del marketplace
                 const createSellOfferTx = await marketplaceContract.createSellOffer(
@@ -123,11 +129,13 @@ const PopupForm = ({ onClose, onSubmit }) => {
                 console.log("Transaction Hash:", tx.hash);
                 window.alert("You successfully created a Sell Offer!");
             } else {
-                const tx = await marketplaceContract.createBuyOffer({
-                    nftAddress, tokenId, deadline
+                const tx = await marketplaceContract.createBuyOffer(
+                    nftAddress,
+                    numTokenId,
+                    deadlineInSeconds,
                     // value signifies the cost of one Planet NFT which is "0.01" eth.
                     // We are parsing price string to ether using the utils library from ethers.js
-                }, { value: utils.parseEther(price) });
+                    { value: priceInWei });
                 setLoading(true);
                 console.log("Transaction Hash:", tx.hash);
                 // wait for the transaction to get mined
@@ -203,7 +211,6 @@ const PopupForm = ({ onClose, onSubmit }) => {
                                 <input className={styles.input} type="text" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
                             </label>
                         </div>
-                        {/* Otros campos... */}
                         <button className={styles.submit_button} type="submit">Enviar</button>
                     </form>
                 </div>

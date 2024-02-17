@@ -1,12 +1,13 @@
 /* NFTGallery.module.css */
 
 .container_gallery {
-    flex-direction: column;
     display: flex;
+    flex-direction: wrap;
     background-color: #dbdde1;
+    border: 2px solid red;
 }
 
-.intro_gallery {
+/*.intro_gallery {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -24,11 +25,12 @@
 .container_image {
     max-width: 600px;
     border-radius: 12px;
-}
+}*/
 
 .gallery {
     display: flex;
     flex-direction: row;
+    justify-content: space-around;
     max-width: 100%;
     border: solid 3px #4caf50;
     background-color: #d9e3ec;
@@ -58,8 +60,8 @@
 }
 
 .nft_image {
-    max-width: 500px;
-    max-height: 100%;
+    max-width: 100%;
+    max-height: auto;
     /*object-fit: cover*/
     object-fit: contain;
     /*max-width: 2000px;*/

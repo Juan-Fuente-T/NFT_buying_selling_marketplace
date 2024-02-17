@@ -50,15 +50,16 @@ const HomePage = () => {
     // Enviar los datos al backend o realizar acciones necesarias
     setNFTsData(formData);
     console.log('Datos del formulario:', formData);
+    console.log('Datos de NFTSDATA:', nftsData);
   };
-
-  // You can fetch NFT data from your smart contract here using useEffect
-
-  const handleAcceptOffer = (nftId, offerType) => {
-    // Implement logic to call the corresponding smart contract function
-    console.log(`Accepted ${offerType} offer for NFT ${nftId}`);
-  };
-
+  /*
+    // You can fetch NFT data from your smart contract here using useEffect
+  
+    const handleAcceptOffer = (nftId, offerType) => {
+      // Implement logic to call the corresponding smart contract function
+      console.log(`Accepted ${offerType} offer for NFT ${nftId}`);
+    };
+  */
 
   async function getNFTMetadata(nftAddress, tokenId, networkId) {
 
@@ -119,8 +120,14 @@ const HomePage = () => {
     <WalletProvider>
       <div>
         <NavBar />
+        <div className={styles.intro_gallery}>
+          <div className={styles.container_title}>
+            <h2 className={styles.nft_title}>NFTs for Sale. Rápid, seguro, efectivo. Compra o vende ya. </h2>
+            <h2 className={styles.nft_title}>Vende los NFT que ya no quieras. Compra los NFT que desees. </h2>
+          </div>
+          <img className={styles.container_image} src='/pop.png' />
+        </div>
         {/*<NFTGallery nfts={SAMPLE_NFTS} nftsData={nftsData} onAcceptOffer={handleAcceptOffer} />*/}
-        <NFTGallery nftsData={nftsData} onAcceptOffer={handleAcceptOffer} />
         <div>
           <div className={styles.container_form}>
             <div className={styles.container_form_button}>
@@ -136,6 +143,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+        <NFTGallery nftsData={nftsData} s />
         {/*<PopupForm />*/}
         <footer className={styles.footer}>
           Made with &#10084; by Juan Fuente
