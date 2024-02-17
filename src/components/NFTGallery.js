@@ -12,10 +12,7 @@ const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS;
 // Acceder al array "abi" dentro del objeto
 const abi = contractABI.abi;
 
-//console.log("DATAfromINDEX", nftsData.tokenId);
-
 async function getNFTMetadata(nftAddress, tokenId, networkId) {
-
 
     const nft = [{
         animation_url: null,
@@ -85,6 +82,16 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
     const web3ModalRef = useRef();
     // Define a new state to hold the metadata of the tokens
     const [tokenMetadatas, setTokenMetadatas] = useState({});*/
+
+    //console.log("DATAfromINDEX", nftsData.tokenId);
+    const fecha = new Date(nftsData.deadline * 1000); // Multiplicamos por 1000 para convertirlo a milisegundos
+
+    const dia = fecha.getDate().toString().padStart(2, '0'); // Obtenemos el día y lo formateamos con dos dígitos
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Obtenemos el mes (se suma 1 porque los meses en JavaScript comienzan desde 0) y lo formateamos con dos dígitos
+    const anio = fecha.getFullYear().toString().slice(-2); // Obtenemos el año y tomamos los últimos dos dígitos
+    const fechaFormateada = `${dia}/${mes}/${anio}`;
+
+
     // Estado para almacenar los metadatos de los NFTs
     const [nftMetadatas, setNftMetadatas] = useState([]);
 
@@ -138,18 +145,25 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                 const offer = await marketplaceContract.getBuyOffer(i);
                 // Filtra las ofertas que no han sido terminadas
                 if (!offer[4]) { // If isEnded is false
+                    const buyOfferId = i;
+                    const nftDataArray = await getNFTMetadata(offer[0], offer[2], 11155111); // Obtiene la URI del token
+
+                    const nftData = nftDataArray[0];
                     const newBuyOffer = {
                         nftAddress: offer[0], // offer[0] is the NFT address
                         offerer: offer[1], // offer[1] is the offerer's address
                         tokenId: offer[2], // offer[2] is the token ID
                         price: offer[3], // offer[3] is the price
-                        isEnded: offer[4] // offer[4] is the isEnded flag
+                        isEnded: offer[4], // offer[4] is the isEnded flag
+                        image_url: nftData.image_url,
+                        name: nftData.name,
+                        offerId: buyOfferId
                     };
                     buyOffersArray.push(newBuyOffer);
                 }
                 console.log("PRICE_BUCLE: ", offer[3]);
             }
-            setSellOffers(sellOffersArray);
+            setBuyOffers(buyOffersArray);
 
             //bueno https://ipfs.io/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/1.png
             console.log("SellOffersArray: ", sellOffers);
@@ -348,13 +362,30 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                             <div className={styles.nft_data}>
                                 <p className={styles.nft_price}>Price: {ethers.utils.formatEther(individualOffer.price)} ETH</p>
                                 <p className={styles.nft_name}>Name: {individualOffer.name}</p>
+                                <p>Finaliza: {fechaFormateada}</p>
 
                                 <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'acceptSellOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Accept Offer</button>
                                 <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'cancelSellOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Cancel Offer</button>
                             </div>
                         </div>
+                    ))}
+                </div>
+            </div>
+            <div className={styles.gallery}>
+                <div className={styles.nft_card}>
+                    {Array.isArray(buyOffers) && buyOffers.map((individualOffer, index) => (
 
+                        <div className={styles.nft_details} key={index}>
+                            <img className={styles.nft_image} src={individualOffer.image_url} alt={`NFT ${individualOffer.tokenId}`} />
+                            <div className={styles.nft_data}>
+                                <p className={styles.nft_price}>Price: {ethers.utils.formatEther(individualOffer.price)} ETH</p>
+                                <p className={styles.nft_name}>Name: {individualOffer.name}</p>
+                                <p>Finaliza: {fechaFormateada}</p>
 
+                                <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'acceptBuyOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Accept Offer</button>
+                                <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'cancelBuyOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Cancel Offer</button>
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>
