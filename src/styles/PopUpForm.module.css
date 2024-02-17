@@ -6,6 +6,9 @@
     justify-content: flex-start;
     color: #fff;
     margin-bottom: 4%;
+    background-color: #212F3D;
+    padding: 5px 15px;
+    border-radius: 5px;
 }
 
 
@@ -70,7 +73,7 @@
     margin-top: 2%;
     margin-bottom: 2%;
     color: #fff;
-    background-color: #24292e;
+    background-color: #212F3D;
     border-radius: 8px;
 }
 
@@ -101,6 +104,6 @@
     width: 10%;
     height: 33px;
     margin-top: 1%;
-    background-color: #24292e;
+    background-color: #212F3D;
     border-radius: 4px;
 }

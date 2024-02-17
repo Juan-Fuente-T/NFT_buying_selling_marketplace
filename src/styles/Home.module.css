@@ -5,6 +5,7 @@
   align-items: center;
   padding: 6rem;
   min-height: 10vh;
+  background-color: aqua;
 }
 
 .description {
@@ -144,7 +145,8 @@
   align-items: center;
   width: 80%;
   height: 300px;
-  background-color: #dbdde1;
+  background-color: #ABB2B9;
+  border-radius: 8px;
 }
 
 .form_button {
@@ -153,7 +155,7 @@
   height: 40px;
   width: 15%;
   margin: 1%;
-  background-color: #24292e;
+  background-color: #212F3D;
   border-radius: 5px;
 }
 
@@ -162,7 +164,7 @@
   display: flex;
   padding: 2rem 0;
   border-top: 1px solid #eaeaea;
-  background-color: #24292e;
+  background-color: #212F3D;
   justify-content: center;
   align-items: center;
 }
