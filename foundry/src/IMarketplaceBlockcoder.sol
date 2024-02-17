@@ -36,7 +36,11 @@ interface IMarketplaceBlockcoder {
 
     function initialize(string calldata _marketplaceName) external;
 
-    function getSellOffer(uint256 offerId) external view returns (address, address, uint256, uint256, bool);
-    
-    function getBuyOffer(uint256 offerId) external view returns (address, address, uint256, uint256, bool);    
+    function getSellOffer(
+        uint256 offerId
+    ) external view returns (address, address, uint256, uint256, uint256, bool);
+
+    function getBuyOffer(
+        uint256 offerId
+    ) external view returns (address, address, uint256, uint256, uint256, bool);
 }

@@ -12,8 +12,13 @@ const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS;
 
 // Acceder al array "abi" dentro del objeto
 const abi = contractABI.abi;
+
+
 //const web3ModalRef = useRef();
 const PopupForm = ({ onClose, onSubmit }) => {
+
+    const [sellOffersEvents, setSellOffersEvents] = useState([]);
+    const [buyOffersEvents, setBuyOffersEvents] = useState([]);
     console.log("ABIPop:", abi);
     console.log("NFT_CONTRACT_ADDRESSPop:", contractAddress);
 
@@ -54,6 +59,7 @@ const PopupForm = ({ onClose, onSubmit }) => {
             const web3Provider = new providers.Web3Provider(provider);
             const signer = web3Provider.getSigner();
             setSigner(signer);*/
+
             if (!nftAddress || !tokenId || !price || !deadline) {
                 throw new Error("Please fill in all required fields");
             }
@@ -68,24 +74,10 @@ const PopupForm = ({ onClose, onSubmit }) => {
 
             //const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 
-            /*console.log("Provider URL Pop:", providerUrl);
-            console.log("Contract Address Pop:", contractAddress);
-            console.log(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);*/
             const marketplaceContract = new Contract(contractAddress, abi, signer);
             const nftContract = new Contract(nftAddress, abiPart, signer);
 
             onSubmit({ nftAddress, tokenId, price, deadline });
-
-            /*const prueba = await marketplaceContract.sellOfferIdCounter();
-            const datos = await marketplaceContract.getSellOffer(0);
-            const datos2 = await marketplaceContract.getBuyOffer(0);
-            console.log("Instance of nftContractPop:", nftContract);
-             console.log("DatosArgumentosPopUp:", nftAddress, tokenId, price, deadline);
-             console.log("Signer address:", await signer.getAddress());
-             console.log("SellCounterPopPrueba: ", prueba);
-             console.log("SellPopDatos: ", datos);
-             console.log("SellPopDatos2: ", datos2);*/
-
             // Conviertir el precio a wei
             const priceInWei = ethers.utils.parseEther(price);
 
@@ -93,6 +85,7 @@ const PopupForm = ({ onClose, onSubmit }) => {
             console.log("PRICEinWEI", priceInWei);
             // Calcular el plazo final en segundos
             const deadlineInSeconds = Math.floor(Date.now() / 1000) + (parseInt(deadline) * 60 * 60 * 24);
+            console.log("DEADLINE: ", deadlineInSeconds);
             const numTokenId = parseInt(tokenId);
             if (offerType == "sell") {
                 //Llama a la función approve en el contrato NFT
@@ -124,10 +117,29 @@ const PopupForm = ({ onClose, onSubmit }) => {
                 console.log("Sell offer created successfully.");
                 */
                 // wait for the transaction to get mined
-                await tx.wait();
+                //await tx.wait();
+                const receipt = await tx.wait();
+
+                // Filtra los eventos relacionados con NewSellOffer
+                const newSellOfferEvents = receipt.events.filter(event => event.event === 'NewSellOffer');
                 setLoading(false);
                 console.log("Transaction Hash:", tx.hash);
                 window.alert("You successfully created a Sell Offer!");
+                // Almacena la información relevante en tu aplicación
+                newSellOfferEvents.forEach(event => {
+                    const sellOfferData = {
+                        nftAddress: event.args.sellOfferId ? event.args.sellOfferId.toNumber() : null,
+                        offerer: event.args.offerer ? event.args.offerer : null,
+                        tokenId: event.args.tokenId ? event.args.tokenId.toNumber() : null,
+                        price: event.args.price ? event.args.price.toString() : null,
+                        deadline: event.args.deadline ? event.args.deadline.toNumber() : null,
+                    };
+                    // Almacena sellOfferData 
+                    sellOffersEvents.push(sellOfferData);
+                    setSellOffersEvents(sellOffersEvents);
+                    console.log("EVENTS: ", sellOffersEvents);
+                })
+
             } else {
                 const tx = await marketplaceContract.createBuyOffer(
                     nftAddress,
@@ -139,9 +151,26 @@ const PopupForm = ({ onClose, onSubmit }) => {
                 setLoading(true);
                 console.log("Transaction Hash:", tx.hash);
                 // wait for the transaction to get mined
-                await tx.wait();
+                //await tx.wait();
+                const receipt = await tx.wait();
+
+                // Filtra los eventos relacionados con NewSellOffer
+                const newBuyOfferEvents = receipt.events.filter(event => event.event === 'NewBuyOffer');
                 setLoading(false);
-                window.alert("You successfully created a Sell Offer!");
+                window.alert("You successfully created a Buy Offer!");
+                newBuyOfferEvents.forEach(event => {
+                    const buyOfferData = {
+                        buyOfferId: event.args.buyOfferId ? event.args.sellOfferId.toNumber() : null,
+                        offerer: event.args.offerer ? event.args.offerer : null,
+                        tokenId: event.args.tokenId ? event.args.tokenId.toNumber() : null,
+                        price: event.args.price ? event.args.price.toString() : null,
+                        deadline: event.args.deadline ? event.args.deadline.toNumber() : null,
+                    };
+                    // Almacena sellOfferData 
+                    buyOffersEvents.push(buyOfferData);
+                    setBuyOffersEvents(buyOffersEvents);
+                    console.log("EVENTS: ", buyOffersEvents);
+                })
             }
 
             onClose();

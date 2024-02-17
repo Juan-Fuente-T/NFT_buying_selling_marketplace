@@ -28,7 +28,7 @@ contract Proxy1967MarketplaceTest is Test {
     uint256 tokenId; //el id del NFT de la oferta
     uint256 price; //el precio en ETH de la oferta
     uint256 deadline; //la fecha máxima para la cual la oferta se podrá aceptar
-    bool isEnded;// booleano que indicará si la oferta ya ha sido aceptada, o si la oferta ha sidocancelada}
+    bool isEnded; // booleano que indicará si la oferta ya ha sido aceptada, o si la oferta ha sidocancelada}
     address nftAddress; //la dirección del contrato NFT de la oferta
     address alice;
     address bob;
@@ -42,13 +42,20 @@ contract Proxy1967MarketplaceTest is Test {
     MarketplaceBlockcoder public marketplaceV2;
 
     event NewSellOffer(
-        uint256 indexed sellOfferIdCounter,
-        address indexed createdBy
+        address indexed createdBy,
+        address indexed nftAddress,
+        uint256 tokenId,
+        uint256 price,
+        uint256 deadline,
+        uint256 indexed sellOfferIdCounter
     );
-
     event NewBuyOffer(
-        uint256 indexed buyOfferIdCounter,
-        address indexed createdBy
+        address indexed createdBy,
+        address indexed nftAddress,
+        uint256 tokenId,
+        uint256 price,
+        uint256 deadline,
+        uint256 indexed buyOfferIdCounter
     );
     event SellOfferAccepted(
         uint indexed sellOfferIdCounter,
@@ -87,7 +94,7 @@ contract Proxy1967MarketplaceTest is Test {
             )
         );
         nft = new TestERC721();
-       
+
         alice = makeAddr("alice");
         bob = makeAddr("bob");
         carol = makeAddr("carol");
@@ -102,39 +109,45 @@ contract Proxy1967MarketplaceTest is Test {
     ////////////////////////////////////////////////////////////////
 
     function testInitialize() public {
-       // IMarketplaceBlockcoder(address(proxy)).initialize("Marketplace BlockCoder");
+        // IMarketplaceBlockcoder(address(proxy)).initialize("Marketplace BlockCoder");
         assertEq(
             IMarketplaceBlockcoder(address(proxy)).marketplaceName(),
             "Marketplace BlockCoder"
         );
         assertEq(IMarketplaceBlockcoder(address(proxy)).owner(), address(this));
         vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
-        IMarketplaceBlockcoder(address(proxy)).initialize("Marketplace_BlockCoder");
-
+        IMarketplaceBlockcoder(address(proxy)).initialize(
+            "Marketplace_BlockCoder"
+        );
     }
 
-    function testUpgradeToAndCall() public{
-        IMarketplaceBlockcoder(address(proxy)).upgradeToAndCall(address(marketplaceV2), "");
- }
+    function testUpgradeToAndCall() public {
+        IMarketplaceBlockcoder(address(proxy)).upgradeToAndCall(
+            address(marketplaceV2),
+            ""
+        );
+    }
 
-    function testReceive() public{
-        (bool success,) = address(proxy).call{value: 1 ether}("");
+    function testReceive() public {
+        (bool success, ) = address(proxy).call{value: 1 ether}("");
         assertTrue(success);
         assertEq(address(proxy).balance, 1 ether);
     }
 
-    function testFallback() public{
-        (bool success,) = address(proxy).call{value: 1 ether}(abi.encodeWithSignature("fallBackTest()"));
+    function testFallback() public {
+        (bool success, ) = address(proxy).call{value: 1 ether}(
+            abi.encodeWithSignature("fallBackTest()")
+        );
         assertTrue(success);
         assertEq(address(proxy).balance, 1 ether);
     }
 
     function testOnERC721Received() public {
         startHoax(alice);
-        assertEq(nft.ownerOf(1),alice);
+        assertEq(nft.ownerOf(1), alice);
         nft.approve(address(proxy), 1);
         nft.safeTransferFrom(alice, address(proxy), 1);
-        assertEq(nft.ownerOf(1),(address(proxy)));
+        assertEq(nft.ownerOf(1), (address(proxy)));
     }
     ////////////////////////////////////////////////////////////////
     ///                   testCreateSaleOffer                    ///
@@ -147,7 +160,14 @@ contract Proxy1967MarketplaceTest is Test {
         nft.approve(address(proxy), 1);
         assertEq(nft.getApproved(1), address(proxy));
         vm.expectEmit();
-        emit NewSellOffer(0, alice);
+        emit NewSellOffer(
+            alice,
+            address(nft),
+            1,
+            0.001 ether,
+            block.timestamp + 1800,
+            0
+        );
         IMarketplaceBlockcoder(address(proxy)).createSellOffer(
             address(nft),
             1,
@@ -160,9 +180,19 @@ contract Proxy1967MarketplaceTest is Test {
             "No se ha creado la Offer"
         );
         assertEq(nft.ownerOf(1), address(proxy));
-        assertEq(IMarketplaceBlockcoder(address(proxy)).sellOfferIdCounter(), 1);
-        (nftAddress, offerer, tokenId, price, isEnded) = IMarketplaceBlockcoder(address(proxy)).getSellOffer(0);
-        assertEq(nftAddress,  address(nft));
+        assertEq(
+            IMarketplaceBlockcoder(address(proxy)).sellOfferIdCounter(),
+            1
+        );
+        (
+            nftAddress,
+            offerer,
+            tokenId,
+            price,
+            ,
+            isEnded
+        ) = IMarketplaceBlockcoder(address(proxy)).getSellOffer(0);
+        assertEq(nftAddress, address(nft));
         assertEq(offerer, alice);
         assertEq(tokenId, 1);
         assertEq(price, 0.001 ether);
@@ -323,7 +353,8 @@ contract Proxy1967MarketplaceTest is Test {
         assertEq(0.7 ether, bob.balance);
         assertEq(1.3 ether, alice.balance);
         assertEq(nft.ownerOf(3), bob);
-        ( , , , , isEnded) = IMarketplaceBlockcoder(address(proxy)).getSellOffer(2);
+        (, , , , , isEnded) = IMarketplaceBlockcoder(address(proxy))
+            .getSellOffer(2);
         assertEq(isEnded, true);
 
         /////////////ERROR2 ACCEPT SELL OFFER 1//////////////
@@ -345,7 +376,7 @@ contract Proxy1967MarketplaceTest is Test {
         if (!ok5) {
             revert CallFailed();
         }
-     }
+    }
 
     ////////////////////////////////////////////////////////////////
     ///                  testCancelSellOffer                     ///
@@ -367,7 +398,7 @@ contract Proxy1967MarketplaceTest is Test {
             1,
             "No se ha creado la Offer"
         );
-      
+
         /////////////ERROR1 SELL OFFER 0//////////////
         vm.startPrank(bob);
         vm.expectRevert(abi.encodeWithSignature("YouAreNotOwner()"));
@@ -385,7 +416,8 @@ contract Proxy1967MarketplaceTest is Test {
         emit SellOfferCancelled(0, alice);
         IMarketplaceBlockcoder(address(proxy)).cancelSellOffer(0);
         assertEq(nft.ownerOf(1), alice);
-        ( , , , , isEnded) = IMarketplaceBlockcoder(address(proxy)).getSellOffer(0);
+        (, , , , , isEnded) = IMarketplaceBlockcoder(address(proxy))
+            .getSellOffer(0);
         assertEq(isEnded, true);
 
         /////////////ERROR3 SELL OFFER 0//////////////
@@ -402,7 +434,14 @@ contract Proxy1967MarketplaceTest is Test {
         /////////////BUY OFFER 0//////////////
         assertEq(alice.balance, 1 ether);
         vm.expectEmit();
-        emit NewBuyOffer(0, alice);
+        emit NewBuyOffer(
+            alice,
+            address(nft),
+            1,
+            0.1 ether,
+            block.timestamp + 3600,
+            0
+        );
         (bool ok1, ) = address(proxy).call{value: 0.1 ether}(
             abi.encodeWithSignature(
                 "createBuyOffer(address,uint256,uint256)",
@@ -416,14 +455,20 @@ contract Proxy1967MarketplaceTest is Test {
         }
         assertEq(alice.balance, 0.9 ether);
 
-
         assertEq(
             IMarketplaceBlockcoder(address(proxy)).buyOfferIdCounter(),
             1,
             "No se ha creado la Offer"
         );
-        (nftAddress, offerer, tokenId, price, isEnded) = IMarketplaceBlockcoder(address(proxy)).getBuyOffer(0);
-        assertEq(nftAddress,  address(nft));
+        (
+            nftAddress,
+            offerer,
+            tokenId,
+            price,
+            ,
+            isEnded
+        ) = IMarketplaceBlockcoder(address(proxy)).getBuyOffer(0);
+        assertEq(nftAddress, address(nft));
         assertEq(offerer, alice);
         assertEq(tokenId, 1);
         assertEq(price, 0.1 ether);
@@ -475,13 +520,19 @@ contract Proxy1967MarketplaceTest is Test {
     ////////////////////////////////////////////////////////////////
     ///                    testAcceptBuyOffer                    ///
     ////////////////////////////////////////////////////////////////
-   
+
     function testAcceptBuyOffer() public {
-        
         /////////////BUY OFFER 0//////////////
         startHoax(bob, 1 ether);
         vm.expectEmit();
-        emit NewBuyOffer(0, bob);
+        emit NewBuyOffer(
+            bob,
+            address(nft),
+            1,
+            1 ether,
+            block.timestamp + 3600,
+            0
+        );
         (bool ok1, ) = address(proxy).call{value: 0.4 ether}(
             abi.encodeWithSignature(
                 "createBuyOffer(address,uint256,uint256)",
@@ -517,7 +568,7 @@ contract Proxy1967MarketplaceTest is Test {
             2,
             "No se ha creado la Offer"
         );
-        
+
         /////////////BUY OFFER 2//////////////
         (bool ok3, ) = address(proxy).call{value: 0.2 ether}(
             abi.encodeWithSignature(
@@ -535,13 +586,14 @@ contract Proxy1967MarketplaceTest is Test {
             3,
             "No se ha creado la Offer"
         );
-        
+
         /////////////CANCEL BUY OFFER 1//////////////
         assertEq(0.1 ether, bob.balance);
         vm.warp(block.timestamp + 110);
         IMarketplaceBlockcoder(address(proxy)).cancelBuyOffer(1);
         assertEq(0.4 ether, bob.balance);
-        (, , , , isEnded) = IMarketplaceBlockcoder(address(proxy)).getBuyOffer(1);
+        (, , , , , isEnded) = IMarketplaceBlockcoder(address(proxy))
+            .getBuyOffer(1);
         assertEq(isEnded, true);
 
         /////////////ERROR BUY OFFER 0//////////////
@@ -557,7 +609,6 @@ contract Proxy1967MarketplaceTest is Test {
         vm.expectRevert(abi.encodeWithSignature("OfferNotExist()"));
         IMarketplaceBlockcoder(address(proxy)).acceptBuyOffer(1);
 
-
         /////////////ACCEPT BUY OFFER 0//////////////
         assertEq(nft.ownerOf(1), alice);
         nft.approve(address(proxy), 1);
@@ -566,11 +617,12 @@ contract Proxy1967MarketplaceTest is Test {
         emit BuyOfferAccepted(0, alice);
 
         IMarketplaceBlockcoder(address(proxy)).acceptBuyOffer(0);
-    
+
         assertEq(0.4 ether, bob.balance);
         assertEq(1.4 ether, alice.balance);
         assertEq(nft.ownerOf(1), bob);
-        (, , , , isEnded) = IMarketplaceBlockcoder(address(proxy)).getBuyOffer(0);
+        (, , , , , isEnded) = IMarketplaceBlockcoder(address(proxy))
+            .getBuyOffer(0);
         assertEq(isEnded, true);
 
         /////////////ERROR BUY OFFER 2/////////////
@@ -640,12 +692,12 @@ contract Proxy1967MarketplaceTest is Test {
         emit BuyOfferCancelled(0, alice);
         IMarketplaceBlockcoder(address(proxy)).cancelBuyOffer(0);
         assertEq(0.8 ether, alice.balance);
-        (, , , , isEnded) = IMarketplaceBlockcoder(address(proxy)).getBuyOffer(0);
+        (, , , , , isEnded) = IMarketplaceBlockcoder(address(proxy))
+            .getBuyOffer(0);
         assertEq(isEnded, true);
 
         /////////////ERROR3 BUY OFFER 0//////////////
         vm.expectRevert(abi.encodeWithSignature("OfferNotExist()"));
         IMarketplaceBlockcoder(address(proxy)).cancelBuyOffer(0);
     }
-
-    }
+}

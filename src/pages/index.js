@@ -143,7 +143,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-        <NFTGallery nftsData={nftsData} s />
+        <NFTGallery nftsData={nftsData} />
         {/*<PopupForm />*/}
         <footer className={styles.footer}>
           Made with &#10084; by Juan Fuente

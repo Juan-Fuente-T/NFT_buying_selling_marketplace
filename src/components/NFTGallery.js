@@ -12,8 +12,8 @@ const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS;
 // Acceder al array "abi" dentro del objeto
 const abi = contractABI.abi;
 
-async function getNFTMetadata(nftAddress, tokenId, networkId) {
 
+async function getNFTMetadata(nftAddress, tokenId, networkId) {
     const nft = [{
         animation_url: null,
         collection: "azukiteamsepolia",
@@ -68,6 +68,7 @@ try {
 //0xef7CdD4bA1186be2A7c3f283DcBEa0Ba7a6B4e2f
 
 const NFTGallery = ({ nftsData, onAcceptOffer }) => {
+    const [formattedDeadlines, setFormattedDeadlines] = useState([]);
     const [sellOffers, setSellOffers] = useState([]);
     const [buyOffers, setBuyOffers] = useState([]);
     const { signer, connectWallet } = useContext(WalletContext);
@@ -84,12 +85,7 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
     const [tokenMetadatas, setTokenMetadatas] = useState({});*/
 
     //console.log("DATAfromINDEX", nftsData.tokenId);
-    const fecha = new Date(nftsData.deadline * 1000); // Multiplicamos por 1000 para convertirlo a milisegundos
 
-    const dia = fecha.getDate().toString().padStart(2, '0'); // Obtenemos el día y lo formateamos con dos dígitos
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Obtenemos el mes (se suma 1 porque los meses en JavaScript comienzan desde 0) y lo formateamos con dos dígitos
-    const anio = fecha.getFullYear().toString().slice(-2); // Obtenemos el año y tomamos los últimos dos dígitos
-    const fechaFormateada = `${dia}/${mes}/${anio}`;
 
 
     // Estado para almacenar los metadatos de los NFTs
@@ -110,15 +106,23 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
             //setTotalSellOffers(total.sub(1)); // Subtract  1 because the counter starts at  1
             const totalSellOffers = _totalSellOffers.toNumber();
             console.log("NFTs_en_Gallery: ", _totalSellOffers, totalSellOffers);
+            const _offer = await marketplaceContract.getSellOffer(0);
+            console.log("OFFERsinFiltro", _offer);
             const sellOffersArray = [];
             for (let i = 0; i < totalSellOffers; i++) {
                 const offer = await marketplaceContract.getSellOffer(i);
+
                 // Filtra las ofertas que no han sido terminadas
-                if (!offer[4]) { // If isEnded is false
+                if (!offer[5]) { // If isEnded is false
+                    console.log("IsEnded:", offer[5]);
+                    console.log("Deadline:", offer[4]);
+                    console.log("Price:", offer[3]);
+                    console.log("TokenId:", offer[2]);
                     const sellOfferId = i;
                     const nftDataArray = await getNFTMetadata(offer[0], offer[2], 11155111); // Obtiene la URI del token
                     //const metadataResponse = await fetch(tokenURI); // Fetch the metadata from the URI
                     const nftData = nftDataArray[0]; // Parse the JSON response
+                    //LLAMAR A FUNCION CON API
                     //const metadata = await nftData.json(); // Parse the JSON response
 
                     const newSellOffer = {
@@ -126,13 +130,16 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                         offerer: offer[1], //  offer[1] is the offerer's address
                         tokenId: offer[2], // offer[2] is the token ID
                         price: offer[3], // offer[3] is the price
-                        isEnded: offer[4], // offer[4] is the isEnded flag
+                        deadline: offer[4], // offer[4] is the is the deadline
+                        isEnded: offer[5], // offer[5] is the isEnded flag
                         image_url: nftData.image_url,
                         name: nftData.name,
                         offerId: sellOfferId
                     };
                     console.log("Image_url", newSellOffer.image_url);
                     sellOffersArray.push(newSellOffer);
+                    console.log("OFFER0: ", sellOffersArray[0])
+                    console.log("OFFER__0?: ", sellOffers[0])
                 }
             }
             setSellOffers(sellOffersArray);
@@ -144,7 +151,7 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
             for (let i = 0; i < totalBuyOffers; i++) {
                 const offer = await marketplaceContract.getBuyOffer(i);
                 // Filtra las ofertas que no han sido terminadas
-                if (!offer[4]) { // If isEnded is false
+                if (!offer[5]) { // If isEnded is false
                     const buyOfferId = i;
                     const nftDataArray = await getNFTMetadata(offer[0], offer[2], 11155111); // Obtiene la URI del token
 
@@ -154,7 +161,8 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                         offerer: offer[1], // offer[1] is the offerer's address
                         tokenId: offer[2], // offer[2] is the token ID
                         price: offer[3], // offer[3] is the price
-                        isEnded: offer[4], // offer[4] is the isEnded flag
+                        deadline: offer[4], // offer[4] is the is the deadline
+                        isEnded: offer[5], // offer[5] is the isEnded flag
                         image_url: nftData.image_url,
                         name: nftData.name,
                         offerId: buyOfferId
@@ -231,11 +239,36 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
     //const nftAddress = '0xed5af388653567af2f388e6224dc7c4b3241c544'; // Dirección del contrato del NFT
     //const networkId = '80001'; //Id de la net, en este caso mumbai
 
+    useEffect(() => {
+        const formatDeadlines = async () => {
+            try {
+                const formattedDates = await Promise.all(
+                    sellOffers.map(async (individualOffer) => {
+                        const fecha = new Date(individualOffer.deadline * 1000);
+                        const dia = fecha.getDate().toString().padStart(2, '0');
+                        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                        const anio = fecha.getFullYear().toString().slice(-2);
+                        const formattedDate = `${dia}/${mes}/${anio}`;
+                        console.log('FormattedXXXDate:', individualOffer.deadline);
+                        console.log('Formatted Date:', formattedDate);
+                        console.log('Merdaseca:', sellOffers);
+                        return formattedDate;
+                    })
+                );
+                setFormattedDeadlines(formattedDates);
+            } catch (error) {
+                console.error('Error formatting deadlines:', error);
+            }
+        };
+
+        formatDeadlines();
+    }, [sellOffers]);
+
     const handleOfferAction = async (offerId, actionType, nftAddress, tokenId, price) => {
         try {
             /*console.log("XXXXXXX3", price);
             //console.log("DATOSXXX: ", sellOffers.nftAddress, abiPartERC721.json, signer);
-
+    
             console.log("OfferId: ", offerId);
             console.log("PARAMETROS", offerId, actionType, nftAddress, tokenId, price);*/
 
@@ -339,10 +372,10 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                         {Array.isArray(sellOffers) && sellOffers.map(async (sellOffer) => {
                             // Obtener información adicional del NFT llamando a getNFTData
                             const nftData = await getNFTMetadata(sellOffer.nftAddress, sellOffer.tokenId, '11155111');
-    
+     
                             // Renderizar la ficha de la Sell Offer con la información obtenida
                             return (
-    
+     
     */
 
     if (loading) {
@@ -362,7 +395,9 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                             <div className={styles.nft_data}>
                                 <p className={styles.nft_price}>Price: {ethers.utils.formatEther(individualOffer.price)} ETH</p>
                                 <p className={styles.nft_name}>Name: {individualOffer.name}</p>
-                                <p>Finaliza: {fechaFormateada}</p>
+                                <p className={styles.nft_name}>Deadline: {individualOffer.deadline}</p>
+                                <p>Finaliza: {formattedDeadlines[index] !== undefined ? formattedDeadlines[index] : 'Cargando...'}</p>
+
 
                                 <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'acceptSellOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Accept Offer</button>
                                 <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'cancelSellOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Cancel Offer</button>
@@ -380,7 +415,7 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                             <div className={styles.nft_data}>
                                 <p className={styles.nft_price}>Price: {ethers.utils.formatEther(individualOffer.price)} ETH</p>
                                 <p className={styles.nft_name}>Name: {individualOffer.name}</p>
-                                <p>Finaliza: {fechaFormateada}</p>
+                                <p>Finaliza: {formattedDeadlines[index]}</p>
 
                                 <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'acceptBuyOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Accept Offer</button>
                                 <button className={styles.accept_button} onClick={() => handleOfferAction(parseInt(individualOffer.offerId), 'cancelBuyOffer', individualOffer.nftAddress, parseInt(individualOffer.tokenId), individualOffer.price)}>Cancel Offer</button>

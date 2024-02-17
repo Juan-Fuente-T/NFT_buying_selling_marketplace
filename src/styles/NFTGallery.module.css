@@ -2,7 +2,7 @@
 
 .container_gallery {
     display: flex;
-    flex-direction: wrap;
+    flex-direction: column;
     background-color: #DDE6ED;
 }
 

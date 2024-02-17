@@ -6,22 +6,21 @@ import {UUPSUpgradeable} from "../node_modules/@openzeppelin/contracts/proxy/uti
 import {IERC721} from "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-
 ////////////////////////////////////////////////////////////
 ///               Marketplace Blockcoder                 ///
 ////////////////////////////////////////////////////////////
 
-/**l comando 
+/**l comando
  * @title MarketplaceBlockcoder
  * @dev A decentralized marketplace contract for NFTs, allowing users to create and accept sell offers.
  */
- contract MarketplaceBlockcoder is UUPSUpgradeable, Initializable{
+contract MarketplaceBlockcoder is UUPSUpgradeable, Initializable {
     ////////////////////////////////////////////////////////////////
     ///                       Variables                          ///
     ////////////////////////////////////////////////////////////////
 
-    
-    struct Offer { // Struct whit data of sellOffers and buyOffers 
+    struct Offer {
+        // Struct whit data of sellOffers and buyOffers
         address nftAddress; //la dirección del contrato NFT de la oferta
         address offerer; //la dirección que ha creado la oferta
         uint256 tokenId; //el id del NFT de la oferta
@@ -36,8 +35,8 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
     address public owner; //dirección del owner del contrato y del proxy
     string public marketplaceName; //nombre del marketplace
 
-    mapping(uint256 => Offer) public sellOffers; //mapeo de un identificados con ofertas de venta
-    mapping(uint256 => Offer) public buyOffers; //mapeo de un identificados con ofertas de compra
+    mapping(uint256 => Offer) public sellOffers; //mapeo de un identificador con ofertas de venta
+    mapping(uint256 => Offer) public buyOffers; //mapeo de un identificador con ofertas de compra
 
     ////////////////////////////////////////////////////////////////
     ///                        Events                            ///
@@ -45,12 +44,20 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
 
     // Events to track offer-related activities
     event NewSellOffer(
-        uint256 indexed sellOfferIdCounter,
-        address indexed createdBy
+        address indexed createdBy,
+        address indexed nftAddress,
+        uint256 tokenId,
+        uint256 price,
+        uint256 deadline,
+        uint256 indexed sellOfferIdCounter
     );
     event NewBuyOffer(
-        uint256 indexed buyOfferIdCounter,
-        address indexed createdBy
+        address indexed createdBy,
+        address indexed nftAddress,
+        uint256 tokenId,
+        uint256 price,
+        uint256 deadline,
+        uint256 indexed buyOfferIdCounter
     );
     event SellOfferAccepted(
         uint indexed sellOfferIdCounter,
@@ -87,11 +94,10 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
     ///                Functions for Implementation              ///
     ////////////////////////////////////////////////////////////////
 
-
     /**
      * @dev Modifier to ensure that only the owner can execute certain functions
      */
-    
+
     modifier onlyOwner() {
         require(
             msg.sender == owner,
@@ -111,12 +117,14 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
     }
 
     /**
-    * @dev Internal function to authorize the upgrade of the implementation contract.
-    * @param newImplementation The address of the new implementation contract.
-    * @notice You can add any authorization logic for the upgrade of the implementation.
-    *         It´s limit by the modifier only to the owner.
-    */
-    function _authorizeUpgrade(address newImplementation) override internal onlyOwner{
+     * @dev Internal function to authorize the upgrade of the implementation contract.
+     * @param newImplementation The address of the new implementation contract.
+     * @notice You can add any authorization logic for the upgrade of the implementation.
+     *         It´s limit by the modifier only to the owner.
+     */
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {
         // Posible lógica de autorización para la actualización de la implementación
     }
 
@@ -125,33 +133,53 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
     ////////////////////////////////////////////////////////////////
 
     /**
-    * @dev Retrieves the details of a sell offer.
-    * @param offerId The ID of the sell offer.
-    * @return nftAddress The address of the NFT contract associated with the offer.
-    * @return offerer The address of the offer creator.
-    * @return tokenId The ID of the NFT being offered.
-    * @return price The price of the offer in ETH.
-    * @return isEnded A boolean indicating whether the offer has ended.
-    */
-  
-    function getSellOffer(uint256 offerId) public view returns (address, address, uint256, uint256, bool) {
-        return (sellOffers[offerId].nftAddress, sellOffers[offerId].offerer, sellOffers[offerId].tokenId, sellOffers[offerId].price, sellOffers[offerId].isEnded);
-    } 
-  
-    /**
-    * @dev Retrieves the details of a buy offer.
-    * @param offerId The ID of the buy offer.
-    * @return nftAddress The address of the NFT contract associated with the offer.
-    * @return offerer The address of the offer creator.
-    * @return tokenId The ID of the NFT being offered.
-    * @return price The price of the offer in ETH.
-    * @return isEnded A boolean indicating whether the offer has ended.
-    */
+     * @dev Retrieves the details of a sell offer.
+     * @param offerId The ID of the sell offer.
+     * @return nftAddress The address of the NFT contract associated with the offer.
+     * @return offerer The address of the offer creator.
+     * @return tokenId The ID of the NFT being offered.
+     * @return price The price of the offer in ETH.
+     * @return deadline The specific time or date by which the offer must be accepted.
+     * @return isEnded A boolean indicating whether the offer has ended.
+     */
 
-    function getBuyOffer(uint256 offerId) public view returns (address, address, uint256, uint256, bool) {
-        return (buyOffers[offerId].nftAddress, buyOffers[offerId].offerer, buyOffers[offerId].tokenId, buyOffers[offerId].price, buyOffers[offerId].isEnded);
-    } 
-  
+    function getSellOffer(
+        uint256 offerId
+    ) public view returns (address, address, uint256, uint256, uint256, bool) {
+        return (
+            sellOffers[offerId].nftAddress,
+            sellOffers[offerId].offerer,
+            sellOffers[offerId].tokenId,
+            sellOffers[offerId].price,
+            sellOffers[offerId].deadline,
+            sellOffers[offerId].isEnded
+        );
+    }
+
+    /**
+     * @dev Retrieves the details of a buy offer.
+     * @param offerId The ID of the buy offer.
+     * @return nftAddress The address of the NFT contract associated with the offer.
+     * @return offerer The address of the offer creator.
+     * @return tokenId The ID of the NFT being offered.
+     * @return price The price of the offer in ETH.
+     * @return deadline The specific time or date by which the offer must be accepted.
+     * @return isEnded A boolean indicating whether the offer has ended.
+     */
+
+    function getBuyOffer(
+        uint256 offerId
+    ) public view returns (address, address, uint256, uint256, uint256, bool) {
+        return (
+            buyOffers[offerId].nftAddress,
+            buyOffers[offerId].offerer,
+            buyOffers[offerId].tokenId,
+            buyOffers[offerId].price,
+            buyOffers[offerId].deadline,
+            buyOffers[offerId].isEnded
+        );
+    }
+
     ////////////////////////////////////////////////////////////////
     ///                     Functions to SELL                    ///
     ////////////////////////////////////////////////////////////////
@@ -172,7 +200,6 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
         uint256 _price,
         uint256 _deadline
     ) public {
-
         ///////////////////////////CHECKS/////////////////////7//////////////
 
         if (_price == 0) {
@@ -207,9 +234,15 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
         );
 
         //-1 porque si tiene que ir despues de aumentar el contador, el contador estara falseado en el emit
-        emit NewSellOffer(sellOfferIdCounter - 1, msg.sender);
+        emit NewSellOffer(
+            msg.sender,
+            _nftAddress,
+            _tokenId,
+            _price,
+            _deadline,
+            sellOfferIdCounter - 1
+        );
     }
-
 
     /**
      * @dev Function to accept sell offers.
@@ -220,7 +253,6 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
      */
 
     function acceptSellOffer(uint256 _sellOfferIdCounter) public payable {
-
         uint256 idCounter = _sellOfferIdCounter;
 
         //////////////////////////// CHECKS  ///////////////////////////////////
@@ -267,7 +299,6 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
      * @notice Ensure that the deadline for the sell offer has not passed.
      */
     function cancelSellOffer(uint256 _sellOfferIdCounter) public {
-
         uint256 idCounter = _sellOfferIdCounter;
 
         //////////////////////////// CHECKS ///////////////////////////////////
@@ -300,7 +331,7 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
     ///                     Functions to BUY                     ///
     ////////////////////////////////////////////////////////////////
 
-       /**
+    /**
      * @dev Function to create buy offers for NFTs.
      * @param _nftAddress The address of the NFT contract.
      * @param _tokenId The ID of the NFT to be offered for purchase.
@@ -343,7 +374,14 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
         //////////////////////////// INTERACTIONS ///////////////////////////////////
 
         //-1 porque si tiene que ir despues de aumentar el contador, el contador estara falseado en el emit
-        emit NewBuyOffer(buyOfferIdCounter - 1, msg.sender);
+        emit NewBuyOffer(
+            msg.sender,
+            _nftAddress,
+            _tokenId,
+            msg.value,
+            _deadline,
+            buyOfferIdCounter - 1
+        );
     }
 
     /**
@@ -355,7 +393,6 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
      */
 
     function acceptBuyOffer(uint256 _buyOfferIdCounter) public {
-
         uint256 idCounter = _buyOfferIdCounter;
 
         //////////////////////////// CHECKS ///////////////////////////////////
@@ -378,9 +415,8 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
 
         buyOffers[idCounter].isEnded = true;
 
-
         //////////////////////////// INTERACTIONS ///////////////////////////////////
-       
+
         IERC721(buyOffers[idCounter].nftAddress).safeTransferFrom(
             msg.sender,
             buyOffers[idCounter].offerer,
@@ -396,7 +432,6 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
 
         emit BuyOfferAccepted(idCounter, msg.sender);
     }
- 
 
     /**
      * @dev Function to cancel buy offers.
@@ -455,7 +490,7 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
         return this.onERC721Received.selector;
     }
 
-     /**
+    /**
      * @dev This function is executed when the contract receives Ether without accompanying data.
      * @notice Ether sent with this transaction is added to the contract's balance.
      */
