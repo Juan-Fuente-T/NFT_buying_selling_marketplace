@@ -124,6 +124,7 @@ const PopupForm = ({ onClose, onSubmit }) => {
                 const newSellOfferEvents = receipt.events.filter(event => event.event === 'NewSellOffer');
                 setLoading(false);
                 console.log("Transaction Hash:", tx.hash);
+                window.alert(`Transaction Hash: ${tx.hash}`);
                 window.alert("You successfully created a Sell Offer!");
                 // Almacena la información relevante en tu aplicación
                 newSellOfferEvents.forEach(event => {
@@ -157,6 +158,7 @@ const PopupForm = ({ onClose, onSubmit }) => {
                 // Filtra los eventos relacionados con NewSellOffer
                 const newBuyOfferEvents = receipt.events.filter(event => event.event === 'NewBuyOffer');
                 setLoading(false);
+                window.alert(`Transaction Hash: ${tx.hash}`)
                 window.alert("You successfully created a Buy Offer!");
                 newBuyOfferEvents.forEach(event => {
                     const buyOfferData = {
@@ -195,10 +197,6 @@ const PopupForm = ({ onClose, onSubmit }) => {
         );
     }
 
-    if (loading) {
-        return <p className={styles.loading}>Loading...</p>;
-    }
-
     return (
         <div className={styles.popup}>
             <div>
@@ -218,6 +216,7 @@ const PopupForm = ({ onClose, onSubmit }) => {
 
                 <div className={styles.popup_content}>
                     <span className={styles.close} onClick={onClose}>&times;</span>
+
                     <form onSubmit={handleSubmit}>
                         {/* Campos del formulario */}
                         <div>
@@ -242,6 +241,11 @@ const PopupForm = ({ onClose, onSubmit }) => {
                         </div>
                         <button className={styles.submit_button} type="submit">Enviar</button>
                     </form>
+                    {loading && (
+                        <div className={styles.loadingPopup}>
+                            <p className={styles.loading}>Loading...</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
