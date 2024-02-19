@@ -73,6 +73,18 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
     const [buyOffers, setBuyOffers] = useState([]);
     const { signer, connectWallet } = useContext(WalletContext);
     const [loading, setLoading] = useState(false);
+    console.log("SignerANtes:", signer);
+    // Verificar si la billetera está conectada
+    const isWalletConnected = signer !== null;
+
+    // Si la billetera no está conectada, instanciar un signer local
+    //const _signer = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_ALCHEMY_RPC_URL);
+
+    // Usar el signer local si la billetera no está conectada
+    //const currentSigner = isWalletConnected ? signer : _signer;
+    //console.log("SignerDespues:", currentSigner);
+
+
     /*// walletConnected keep track of whether the user's wallet is connected or not
     const [walletConnected, setWalletConnected] = useState(false);
     // loading is set to true when we are waiting for a transaction to get mined
@@ -91,9 +103,13 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
     // Estado para almacenar los metadatos de los NFTs
     const [nftMetadatas, setNftMetadatas] = useState([]);
 
+    //const marketplaceContract = new Contract(contractAddress, abi, currentSigner);
     const marketplaceContract = new Contract(contractAddress, abi, signer);
-    //const nftContract = new Contract(sellOffers.nftAddress, abiPartERC721.json, signer);
-    console.log("DATOSXXX: ", sellOffers.nftAddress, abiPartERC721, signer);
+    //const nftContract = new Contract(sellOffers.nftAddress, abiPartERC721.json, currentSigner);
+    const provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_ALCHEMY_RPC_URL);
+    console.log("Provider:", provider);
+    // Instancia del contrato sin signer (para obtener información)
+    const marketplaceContractInfo = new Contract(contractAddress, abi, provider);
 
     console.log("Datos_en_Gallery: ", nftsData.nftAddress, nftsData.tokenId, nftsData.price);
     //console.log("YYYYYYYYYYY", ethers.utils.parseEther(nftsData.price));
@@ -102,15 +118,15 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
             // Estado para almacenar los metadatos de los NFTs
             //const [nftMetadatas, setNftMetadatas] = useState([]);
             // Obtén el número total de sell offers desde el contrato
-            const _totalSellOffers = await marketplaceContract.sellOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
+            const _totalSellOffers = await marketplaceContractInfo.sellOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
+            console.log("ContractInfo", marketplaceContractInfo);
             //setTotalSellOffers(total.sub(1)); // Subtract  1 because the counter starts at  1
             const totalSellOffers = _totalSellOffers.toNumber();
-            console.log("NFTs_en_Gallery: ", _totalSellOffers, totalSellOffers);
-            const _offer = await marketplaceContract.getSellOffer(0);
+            const _offer = await marketplaceContractInfo.getSellOffer(0);
             console.log("OFFERsinFiltro", _offer);
             const sellOffersArray = [];
             for (let i = 0; i < totalSellOffers; i++) {
-                const offer = await marketplaceContract.getSellOffer(i);
+                const offer = await marketplaceContractInfo.getSellOffer(i);
 
                 // Filtra las ofertas que no han sido terminadas
                 if (!offer[5]) { // If isEnded is false
@@ -144,12 +160,14 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
             }
             setSellOffers(sellOffersArray);
 
-            const _totalBuyOffers = await marketplaceContract.buyOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
+            const _totalBuyOffers = await marketplaceContractInfo.buyOfferIdCounter(); // NFTs are at index n + 1 in the sellOfferIdCounter variable
             const totalBuyOffers = _totalBuyOffers.toNumber();
             console.log("NFTs_en_BUYGallery: ", _totalBuyOffers, totalBuyOffers);
+            const buyOffer = await marketplaceContractInfo.getBuyOffer(0).deadline;
+            console.log("BUYOffer_sin_filtro: ", buyOffer);
             const buyOffersArray = [];
             for (let i = 0; i < totalBuyOffers; i++) {
-                const offer = await marketplaceContract.getBuyOffer(i);
+                const offer = await marketplaceContractInfo.getBuyOffer(i);
                 // Filtra las ofertas que no han sido terminadas
                 if (!offer[5]) { // If isEnded is false
                     const buyOfferId = i;
@@ -176,25 +194,26 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
             //bueno https://ipfs.io/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/1.png
             console.log("SellOffersArray: ", sellOffers);
         } catch (error) {
-            console.error("Error fetching sell offers:", error);
+            console.error("Error fetching offers:", error);
         }
     };
-    useEffect(() => {
+    /*useEffect(() => {
         console.log("SellOffersPRICEXX: ", sellOffers.tokenId);
-    }, [sellOffers]);
+    }, [sellOffers]);*/
 
     // Llamada a la función que obtiene las sell offers cuando el componente se monta
     useEffect(() => {
         fetchOffers();
+        //}, [currentSigner]); // Dependencia en signer para volver a ejecutar la función cuando se conecta la billetera
     }, [signer]); // Dependencia en signer para volver a ejecutar la función cuando se conecta la billetera
 
 
     useEffect(() => {
         // Solo busca los metadatos si hay ofertas de venta disponibles
-        if (sellOffers.length > 0) {
+        if ((sellOffers.length > 0 || buyOffers.length > 0) && !loading) {
             fetchNFTMetadatas();
         }
-    }, [sellOffers]); // Dependencia en sellOffers para volver a ejecutar la función cuando cambian las ofertas
+    }, [sellOffers, buyOffers, loading]);// Dependencia en sellOffers para volver a ejecutar la función cuando cambian las ofertas
     console.log("BuyOffersArray: ", buyOffers);
     // Función para obtener los metadatos de los NFTs
     const fetchNFTMetadatas = async () => {
@@ -267,17 +286,18 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
     const handleOfferAction = async (offerId, actionType, nftAddress, tokenId, price) => {
         try {
             /*console.log("XXXXXXX3", price);
-            //console.log("DATOSXXX: ", sellOffers.nftAddress, abiPartERC721.json, signer);
+            //console.log("DATOSXXX: ", sellOffers.nftAddress, abiPartERC721.json, currentSigner);
     
             console.log("OfferId: ", offerId);
             console.log("PARAMETROS", offerId, actionType, nftAddress, tokenId, price);*/
 
 
             //const numOfferId = parseInt(offerId);
-            console.log("XXXXXXX", price);
+            console.log("PRICEXXXXXXX", price);
 
 
             if (actionType === 'acceptSellOffer') {
+                //console.log("DATOSXXXBOTON: ", nftAddress, abiPartERC721, currentSigner);
                 console.log("DATOSXXXBOTON: ", nftAddress, abiPartERC721, signer);
 
                 console.log("PARAMETROS BOTON: ", offerId, actionType, nftAddress, tokenId, price);
@@ -341,6 +361,7 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                 window.alert("You successfully cancelled a Sell Offer!");
 
             } else if (actionType === 'acceptBuyOffer') {
+                //const nftContract = new Contract(nftAddress, abiPartERC721.json, currentSigner);
                 const nftContract = new Contract(nftAddress, abiPartERC721.json, signer);
                 const approveTx = await nftContract.approve(contractAddress, tokenId);
                 setLoading(true);
@@ -377,11 +398,20 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
                             return (
      
     */
-
-    if (loading) {
-        return <p className={styles.loading}>Loading...</p>;
+    /*
+        if (loading) {
+            return (
+                <div>
+                    <p className={styles.loading}>Loading...</p>
+                </div>);
+        }*/
+    {
+        loading && (
+            <div className={styles.loadingPopup}>
+                <p className={styles.loading}>Loading...</p>
+            </div>
+        )
     }
-
 
     return (
         <div className={styles.container_gallery}>
