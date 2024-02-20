@@ -112,21 +112,61 @@
 .intro_gallery {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-around;
-  border: solid 3px forestgreen;
   margin: 2%;
   padding: 4%;
+  background-image: url('/Marketplace_Compra_Venta_fondo_NFT_Juan_Fuente.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
 }
 
 .container_title {
-  font-size: 1.2em;
+  font-size: 1.6em;
+  font-weight: 600;
+  padding: 2%;
+  margin: 3%;
+
+}
+
+.nft_title {
+  font-size: 1.8em;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  color: #212F3D;
+  padding: 2% 8%;
+  margin: 3%;
+  background-color: #c3cdd7;
+  border-radius: 8px;
+}
+
+.nft_characteristics {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
   padding: 2%;
   margin: 3%;
 }
 
+.nft_feature {
+  font-size: 1.2em;
+  font-weight: 600;
+  text-align: center;
+  color: #212F3D;
+  padding: 2% 2%;
+  margin: 3%;
+  background-color: #c3cdd7;
+  border-radius: 8px;
+}
+
+
 .container_image {
-  max-width: 600px;
+  max-width: 40%;
   border-radius: 12px;
+  border-radius: 8px;
 }
 
 
@@ -147,6 +187,19 @@
   height: 300px;
   background-color: #ABB2B9;
   border-radius: 8px;
+  background-image: url('/Marketplace_Compra_Venta_NFT_Juan_Fuente.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.text_form_button {
+  font-size: 1.1em;
+  color: #76D7C4;
+  width: 350px;
+  padding: 3%;
+  margin: 1%;
+  background-color: #212F3D;
+  border-radius: 5px;
 }
 
 .form_button {
@@ -157,6 +210,45 @@
   margin: 1%;
   background-color: #212F3D;
   border-radius: 5px;
+}
+
+.appUse_section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 50px;
+  padding: 5%;
+  background-image: url('/Marketplace_Compra_Venta_fondo_NFT_JuanFuente.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.appUse_section>* {
+  flex-basis: calc(25% - 20px);
+  /* Muestra 4 fichas en una fila */
+  margin: 10px;
+  /* Ajusta el margen según sea necesario */
+}
+
+@media (max-width: 1200px) {
+  .appUse_section>* {
+    flex-basis: calc(33.33% - 20px);
+    /* Muestra 3 fichas en una fila */
+  }
+}
+
+@media (max-width: 900px) {
+  .appUse_section>* {
+    flex-basis: calc(50% - 20px);
+    /* Muestra 2 fichas en una fila */
+  }
+}
+
+@media (max-width: 600px) {
+  .appUse_section>* {
+    flex-basis: calc(100% - 20px);
+    /* Muestra 1 ficha en una fila */
+  }
 }
 
 .footer {

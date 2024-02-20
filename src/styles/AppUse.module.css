@@ -1,0 +1,45 @@
+.section_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    margin: 1% 1%;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #212F3D;
+}
+
+.section_icon {
+    width: 100px;
+    /* Ajusta el tamaño del icono según tu preferencia */
+    height: 70px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.appUse_icono {
+    width: 50px;
+    /* Ajusta el tamaño del icono según tu preferencia */
+    height: 50px;
+    margin-bottom: %;
+    background-image: url('/icono1.png');
+    background-size: cover;
+    background-position: center;
+
+}
+
+.section_title {
+    font-size: 1.5em;
+    color: #DDE6ED;
+    text-align: center;
+}
+
+.section_description {
+    font-size: 1em;
+    color: #DDE6ED;
+    text-align: center;
+    margin-top: 4%;
+}

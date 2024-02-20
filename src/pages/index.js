@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
 import NFTGallery from '../components/NFTGallery';
 import PopupForm from '../components/PopUpForm';
+import AppUseSection from '../components/AppUse';
 import styles from "../styles/Home.module.css";
 import { WalletProvider } from '../components/WalletContext';
 
@@ -121,11 +122,16 @@ const HomePage = () => {
       <div>
         <NavBar />
         <div className={styles.intro_gallery}>
+          <img className={styles.container_image} src='./Marketplace_Compra_Venta_NFT_JuanFuente.jpg' />
           <div className={styles.container_title}>
-            <h2 className={styles.nft_title}>NFTs for Sale. Rápid, seguro, efectivo. Compra o vende ya. </h2>
-            <h2 className={styles.nft_title}>Vende los NFT que ya no quieras. Compra los NFT que desees. </h2>
+            <h2 className={styles.nft_title}>Compra venta de NFTs </h2>
+            <h2 className={styles.nft_feature}>Vende los NFT que ya no quieras. Compra los NFT que desees. </h2>
+            <div className={styles.nft_characteristics}>
+              <p className={styles.nft_feature}> Rápido</p>
+              <p className={styles.nft_feature}> Eficiente</p>
+              <p className={styles.nft_feature}> Seguro</p>
+            </div>
           </div>
-          <img className={styles.container_image} src='/pop.png' />
         </div>
         {/*<NFTGallery nfts={SAMPLE_NFTS} nftsData={nftsData} onAcceptOffer={handleAcceptOffer} />*/}
         <div>
@@ -144,6 +150,30 @@ const HomePage = () => {
           </div>
         </div>
         <NFTGallery nftsData={nftsData} />
+        <div>
+          <div className={styles.appUse_section}>
+            <AppUseSection
+              icon="./icono1.png"
+              title="Ofertas de Venta"
+              description="Vende tu Nft indicando la dirección,  el Id, su precio y fecha tope."
+            />
+            <AppUseSection
+              icon="./icono2.png"
+              title="Ofertas de Compra"
+              description="Publica el Nft que desees, indicando el precio que deseas pagar."
+            />
+            <AppUseSection
+              icon="./icono3.png"
+              title="Aceptar Ofertas"
+              description="Acepta ofertas de venta, enviando el precio, o de compra recibiendo el valor"
+            />
+            <AppUseSection
+              icon="./icono4.png"
+              title="Cancelar Ofertas"
+              description="Cancela pasada la fecha límite, recuperando el ether depositado y la titularidad del NFT."
+            />
+          </div>
+        </div>
         {/*<PopupForm />*/}
         <footer className={styles.footer}>
           Made with &#10084; by Juan Fuente

@@ -7,29 +7,31 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 
 
 const NavBar = () => {
-    const { walletConnected, connectWallet } = useContext(WalletContext);
+  const { walletConnected, connectWallet, address } = useContext(WalletContext);
+  const truncatedAddress = address ? `${address.substring(0, 6)}...${address.substring(address.length - 4)}` : '';
 
 
 
-    return (
-        <nav>
-            <div>
-                <div className={styles.container}>
-                    <img src="/pop_logo.png" className={styles.image_logo} alt="Logo_de_app_de_compra_venta_de_NFTs" />
-                    <h1 className={styles.title}>
-                        Welcome to Marketplace Blockcoder App {/*address*/}!
-                    </h1>
-                    {walletConnected ? (
-                        <div>Wallet connected</div>
-                    ) : (
-                        <button onClick={connectWallet} className={styles.button}>
-                            Connect your wallet
-                        </button>
-                    )}
-                </div>
-            </div>
-        </nav>
-    );
+  return (
+    <nav>
+      <div>
+        <div className={styles.container}>
+          <img src="/logo.png" className={styles.image_logo} alt="Logo_de_app_de_compra_venta_de_NFTs" />
+          <h1 className={styles.title}>
+            Future Garden Marketplace
+          </h1>
+          {walletConnected ? (
+            <div>Wallet connected</div>
+          ) : (
+            <button onClick={connectWallet} className={styles.button}>
+              Connect your wallet
+            </button>
+          )}
+          <p>{truncatedAddress}</p>
+        </div>
+      </div>
+    </nav>
+  );
 };
 export default NavBar;
 

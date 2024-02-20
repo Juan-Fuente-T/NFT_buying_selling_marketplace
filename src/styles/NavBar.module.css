@@ -1,20 +1,22 @@
 .container {
     display: flex;
     flex-direction: row;
+    font-size: 1.5rem;
+    color: #fff;
     justify-content: space-around;
     align-items: center;
-    border-radius: 12px;
-    background-color: #c3cdd7;
+    background-color: #808B96;
 }
 
 .image_logo {
-    max-width: 190px;
+    max-width: 20%;
     max-height: 50px;
     margin: 1% 1%;
+    border-radius: 4px;
 }
 
 .title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     margin: 2rem 0;
 }
 
@@ -23,10 +25,11 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    background-color: blue;
+    color: #76D7C4;
+    background-color: #212F3D;
     border: none;
-    color: #ffffff;
-    font-size: 1em;
+    /*color: #ffffff;*/
+    font-size: 1.2em;
     padding: 15px;
     width: 180px;
     height: 55px;

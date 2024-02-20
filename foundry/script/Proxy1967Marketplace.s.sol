@@ -20,6 +20,7 @@ contract MyScript is Script {
             address(marketplace),
             abi.encodeWithSignature("initialize()")
         );
+
         vm.stopBroadcast();
     }
 }
