@@ -1,3 +1,7 @@
+-----------****Uncompleted. The front is missing. Smart contract working perfectly using UUPS proxy. Test with very high coverage.****-----------
+
+-----------****Sin completar. Falta finalizar el front. Smart contract funcionando perfectamente usando proxy UUPS. Test con muy alta covertura.****-----------
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
