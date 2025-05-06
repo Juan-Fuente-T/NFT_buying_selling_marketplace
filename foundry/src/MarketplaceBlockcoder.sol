@@ -10,7 +10,7 @@ import {Initializable} from "../node_modules/@openzeppelin/contracts/proxy/utils
 ///               Marketplace Blockcoder                 ///
 ////////////////////////////////////////////////////////////
 
-/**l comando
+/**
  * @title MarketplaceBlockcoder
  * @dev A decentralized marketplace contract for NFTs, allowing users to create and accept sell offers.
  */

@@ -529,7 +529,7 @@ contract Proxy1967MarketplaceTest is Test {
             bob,
             address(nft),
             1,
-            1 ether,
+            0.4 ether,
             block.timestamp + 3600,
             0
         );

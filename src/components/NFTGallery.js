@@ -124,7 +124,7 @@ const NFTGallery = ({ nftsData, onAcceptOffer }) => {
 
 
 
-    console.log("Datos_en_Gallery: ", nftsData.nftAddress, nftsData.tokenId, nftsData.price);
+    console.log("Datos_en_Gallery: ", nftsData?.nftAddress, nftsData?.tokenId, nftsData?.price);
     //console.log("YYYYYYYYYYY", ethers.utils.parseEther(nftsData.price));
 
     const fetchOffers = async () => {
