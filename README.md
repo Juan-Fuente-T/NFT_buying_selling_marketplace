@@ -1,44 +1,67 @@
------------****Uncompleted. The front is missing. Smart contract working perfectly using UUPS proxy. Test with very high coverage.****-----------
+# Smart Contract: NFT Marketplace Multi-Origen (Solidity/Foundry) 📄
 
------------****Sin completar. Falta finalizar el front. Smart contract funcionando perfectamente usando proxy UUPS. Test con muy alta covertura.****-----------
+![Test Coverage](src/CoverturaSmartContractBootcamp.jpg)
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Descripción
 
-## Getting Started
+Este repositorio contiene el **contrato inteligente (Solidity)** para un marketplace descentralizado de NFTs, diseñado con la ambición de permitir a los usuarios listar y vender NFTs acuñados en *diferentes* plataformas o contratos (identificados por su dirección de contrato y Token ID). El desarrollo se centró en crear una lógica on-chain robusta, segura y actualizable mediante el uso de **proxies UUPS**.
 
-First, run the development server:
+*Nota: Este contrato fue desarrollado como proyecto final del Bootcamp Blockchain Solidity.*
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Funcionalidades Implementadas (Contrato)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* **Listado de NFTs Externos:** Lógica para que un usuario registre un NFT (indicando contrato y Token ID) para su venta en el marketplace.
+* **Gestión de Precios:** Funciones para establecer y actualizar el precio de venta de los NFTs listados.
+* **Mecanismo de Compra/Venta:** Orquestación segura de la transferencia del NFT y el pago (en ETH o token ERC20) entre comprador y vendedor.
+* **Retirada de NFTs:** Permite a los propietarios retirar sus NFTs de la venta.
+* **Patrón UUPS Proxy:** Implementado para permitir futuras actualizaciones de la lógica del contrato sin afectar a los datos almacenados ni a la dirección principal del marketplace.
+* **Seguridad:** Aplicación de buenas prácticas y controles (ej. Checks-Effects-Interactions) para prevenir vulnerabilidades comunes.
+* **Testing Exhaustivo:** Desarrollado con **Foundry**, alcanzando una **alta cobertura de tests unitarios (>90%)** que valida la lógica implementada.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## Tecnologías (Contrato)
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+* **Lenguaje:** Solidity versión ^0.8.20
+* **Testing:** Foundry
+* **Patrones:** UUPS Proxy (OpenZeppelin Contracts) 
+* **Estándares:** ERC721 (para interactuar con los NFTs externos)
+* **Blockchain:** Ethereum (Sepolia Testnet)
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Retos y Estado Actual
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+El principal reto conceptual abordado fue cómo manejar de forma genérica la **obtención y verificación de metadatos e imágenes de NFTs externos**, que pueden residir en IPFS, Arweave o servidores centralizados, y provenir de distintos estándares o redes.
 
-## Learn More
+Se inició el desarrollo de un frontend (React/TypeScript) para interactuar con este contrato, pero su **finalización quedó pendiente** precisamente debido a la complejidad de implementar una solución frontend universal y robusta para esta recuperación de datos externos diversos.
 
-To learn more about Next.js, take a look at the following resources:
+El **smart contract, sin embargo, es funcional y está rigurosamente testeado** para la lógica on-chain implementada.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cómo Empezar (Testeo Local del Contrato)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+**(Completa los comandos exactos)**
 
-## Deploy on Vercel
+1.  **Prerrequisitos:** Git, Foundry (`[Enlace instalación Foundry]`)
+2.  **Clonar:**
+    ```bash
+    git clone https://github.com/Juan-Fuente-T/NFT_buying_selling_marketplace.git
+    cd NFT_buying_selling_marketplace
+    ```
+3.  **Instalar Dependencias:**
+    ```bash
+    forge install 
+    ```
+4.  **Compilar:**
+    ```bash
+    forge build
+    ```
+5.  **Ejecutar Tests:**
+    ```bash
+    forge test # (Verifica cobertura >90%)
+    forge coverage # (Verifica cobertura >90%)
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Licencia 📄
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+MIT License.
+
+## Contacto 📬
+
+Juan Fuente - [https://www.linkedin.com/in/juan-fuente-dev/] - [https://juanfuente.ovh] 
